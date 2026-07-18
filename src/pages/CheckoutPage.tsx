@@ -75,7 +75,7 @@ export function CheckoutPage() {
           <CardTitle className="text-2xl">Ative o MeuOrça</CardTitle>
           <CardDescription>
             {daysLeft > 0
-              ? `Seu trial termina em ${daysLeft} dias. Garanta 1 ano de acesso com pagamento único!`
+              ? `Seu período grátis termina em ${daysLeft} dias. Garanta 1 ano de acesso com pagamento único!`
               : 'Seu período de teste expirou. Ative por R$ 9,90 — pagamento único.'}
           </CardDescription>
         </CardHeader>

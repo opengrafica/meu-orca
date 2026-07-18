@@ -71,7 +71,7 @@ SET search_path = public
 AS $$
 BEGIN
   INSERT INTO public.profiles (user_id, email, subscription_expires_at)
-  VALUES (NEW.id, NEW.email, now() + interval '7 days');
+  VALUES (NEW.id, NEW.email, now() + interval '3 days');
   RETURN NEW;
 END;
 $$;

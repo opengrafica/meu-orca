@@ -29,7 +29,7 @@ const plans = [
   'Dashboard completo',
   'Histórico e duplicar orçamentos',
   'Suporte por e-mail',
-  '7 dias grátis para testar',
+  '3 dias grátis para testar',
 ]
 
 export function LandingPage() {
@@ -85,7 +85,7 @@ export function LandingPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Button size="lg" className="h-12 px-8 text-base" render={<Link to="/register" />}>
-              Testar 7 dias grátis
+              Testar 3 dias grátis
               <ArrowRight className="size-4" />
             </Button>
             <Button size="lg" variant="outline" className="h-12 px-8 text-base" render={<Link to="/login" />}>
@@ -150,10 +150,10 @@ export function LandingPage() {
               ))}
             </ul>
             <Button className="mt-8 w-full h-12 text-base" size="lg" render={<Link to="/register" />}>
-              Começar agora — 7 dias grátis
+              Começar agora — 3 dias grátis
             </Button>
             <p className="text-muted-foreground mt-3 text-center text-xs">
-              Cancele quando quiser · Sem cartão no trial
+              Cancele quando quiser · Sem cartão no período grátis
             </p>
           </div>
         </div>
@@ -177,7 +177,7 @@ export function LandingPage() {
       <section className="bg-primary px-4 py-16 text-primary-foreground">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-3xl font-bold">Pronto para profissionalizar seus orçamentos?</h2>
-          <p className="mt-3 opacity-90">Comece grátis por 7 dias. Sem compromisso.</p>
+          <p className="mt-3 opacity-90">Comece grátis por 3 dias. Depois, R$ 9,90 pagamento único.</p>
           <Button
             size="lg"
             variant="secondary"
