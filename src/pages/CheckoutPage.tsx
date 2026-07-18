@@ -15,6 +15,7 @@ const benefits = [
   'Gestão completa de clientes',
   'Histórico e duplicação de orçamentos',
   'Acesso em celular e computador',
+  'Sem renovação automática',
 ]
 
 export function CheckoutPage() {
@@ -74,8 +75,8 @@ export function CheckoutPage() {
           <CardTitle className="text-2xl">Ative o MeuOrça</CardTitle>
           <CardDescription>
             {daysLeft > 0
-              ? `Seu trial termina em ${daysLeft} dias. Garanta mais 1 ano de acesso!`
-              : 'Seu período de teste expirou. Continue por apenas R$ 9,90/ano.'}
+              ? `Seu trial termina em ${daysLeft} dias. Garanta 1 ano de acesso com pagamento único!`
+              : 'Seu período de teste expirou. Ative por R$ 9,90 — pagamento único.'}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -83,8 +84,8 @@ export function CheckoutPage() {
             <Badge variant="secondary" className="mb-2">Pagamento único</Badge>
             <div className="flex items-end justify-center gap-1">
               <span className="text-4xl font-bold">R$ 9,90</span>
-              <span className="text-muted-foreground mb-1 text-sm">/ano</span>
             </div>
+            <p className="text-muted-foreground mt-2 text-sm">1 ano de acesso · Sem mensalidade</p>
           </div>
 
           <ul className="space-y-2">

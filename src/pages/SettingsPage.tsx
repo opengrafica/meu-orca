@@ -45,8 +45,8 @@ export function SettingsPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Assinatura</CardTitle>
-            <CardDescription>Seu plano MeuOrça — R$ 9,90/ano</CardDescription>
+            <CardTitle className="text-base">Meu Acesso</CardTitle>
+            <CardDescription>Pagamento único de R$ 9,90 · 1 ano de uso</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex items-center justify-between">
@@ -63,7 +63,7 @@ export function SettingsPage() {
             )}
             {!active && (
               <Button className="w-full" render={<Link to="/checkout" />}>
-                Renovar por R$ 9,90/ano
+                Comprar acesso — R$ 9,90
               </Button>
             )}
           </CardContent>

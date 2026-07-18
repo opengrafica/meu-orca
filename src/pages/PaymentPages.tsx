@@ -13,7 +13,7 @@ export function PaymentSuccessPage() {
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-muted-foreground">
-            Seu acesso ao MeuOrça foi ativado por 1 ano. Obrigado!
+            Pagamento confirmado! Seu acesso ao MeuOrça está ativo por 1 ano. Obrigado!
           </p>
           <Button className="w-full" render={<Link to="/dashboard" />}>
             Acessar MeuOrça

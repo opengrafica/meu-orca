@@ -29,8 +29,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const preference = {
     items: [
       {
-        title: 'MeuOrça — Acesso Anual',
-        description: 'Gerador de orçamentos profissionais por 1 ano',
+        title: 'MeuOrça — Pagamento Único',
+        description: 'Acesso completo por 1 ano — pagamento único de R$ 9,90',
         quantity: 1,
         unit_price: 9.9,
         currency_id: 'BRL',

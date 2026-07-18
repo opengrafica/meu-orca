@@ -93,7 +93,7 @@ export function LandingPage() {
             </Button>
           </div>
           <p className="text-muted-foreground mt-4 text-sm">
-            Depois apenas <strong className="text-foreground">R$ 9,90/ano</strong> — pagamento único
+            Depois apenas <strong className="text-foreground">R$ 9,90</strong> — pagamento único · 1 ano de acesso
           </p>
         </div>
       </section>
@@ -134,12 +134,12 @@ export function LandingPage() {
           <div className="rounded-2xl border-2 border-primary bg-card p-8 shadow-lg">
             <div className="text-center">
               <Badge className="mb-4">Mais popular</Badge>
-              <h2 className="text-2xl font-bold">Plano Anual</h2>
+              <h2 className="text-2xl font-bold">Pagamento Único</h2>
               <div className="mt-4 flex items-end justify-center gap-1">
                 <span className="text-5xl font-bold">R$ 9,90</span>
-                <span className="text-muted-foreground mb-2">/ano</span>
               </div>
-              <p className="text-muted-foreground mt-2 text-sm">Pagamento único · Sem mensalidade</p>
+              <p className="text-muted-foreground mt-2 text-sm">Pague uma vez · Acesso por 1 ano completo</p>
+              <p className="text-muted-foreground mt-1 text-xs">Sem mensalidade · Sem renovação automática</p>
             </div>
             <ul className="mt-8 space-y-3">
               {plans.map((item) => (
