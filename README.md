@@ -30,6 +30,15 @@ Gerador de orçamentos online simples, moderno e extremamente fácil de usar par
 - Conta no [Vercel](https://vercel.com) (para deploy)
 - Conta no [GitHub](https://github.com) (para versionamento)
 
+## Links do Projeto
+
+| Serviço | URL |
+|---------|-----|
+| **App (Produção)** | https://meu-orca.vercel.app |
+| **GitHub** | https://github.com/opengrafica/meu-orca |
+| **Supabase Dashboard** | https://supabase.com/dashboard/project/qtjzlivsebmamyppqawc |
+| **Vercel Dashboard** | https://vercel.com/robsons-projects-a9a49b5e/meu-orca |
+
 ## Instalação Local
 
 ```bash
@@ -83,8 +92,10 @@ Isso cria:
 ### 3. Configurar Auth
 
 Em **Authentication → URL Configuration**, adicione:
-- Site URL: `http://localhost:5173` (dev) ou sua URL da Vercel (prod)
-- Redirect URLs: `http://localhost:5173/login` e `https://seu-dominio.vercel.app/login`
+- Site URL: `https://meu-orca.vercel.app`
+- Redirect URLs:
+  - `https://meu-orca.vercel.app/login`
+  - `http://localhost:5173/login`
 
 ### 4. Storage
 
