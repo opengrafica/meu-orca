@@ -5,6 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { toast } from 'sonner'
 import { signIn } from '@/services/authService'
+import { supabase } from '@/lib/supabase'
+import { isAdminUser } from '@/lib/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -28,8 +30,9 @@ export function LoginPage() {
     setLoading(true)
     try {
       await signIn(data.email, data.password)
+      const { data: { user } } = await supabase.auth.getUser()
       toast.success('Login realizado com sucesso!')
-      navigate('/')
+      navigate(isAdminUser(user) ? '/admin' : '/')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao fazer login')
     } finally {

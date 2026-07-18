@@ -3,7 +3,9 @@ import { Toaster } from '@/components/ui/sonner'
 import { AuthProvider, useAuth } from '@/contexts/AuthContext'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { AdminRoute } from '@/components/AdminRoute'
 import { AppLayout } from '@/components/layout/AppLayout'
+import { AdminLayout } from '@/components/layout/AdminLayout'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
@@ -14,10 +16,14 @@ import { HistoryPage } from '@/pages/HistoryPage'
 import { ProfilePage } from '@/pages/ProfilePage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { NotFoundPage } from '@/pages/NotFoundPage'
+import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
+import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
+import { AdminClientsPage } from '@/pages/admin/AdminClientsPage'
+import { AdminQuotesPage } from '@/pages/admin/AdminQuotesPage'
 import { Skeleton } from '@/components/ui/skeleton'
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
 
   if (loading) {
     return (
@@ -28,7 +34,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (user) {
-    return <Navigate to="/" replace />
+    return <Navigate to={isAdmin ? '/admin' : '/'} replace />
   }
 
   return <>{children}</>
@@ -43,6 +49,15 @@ export default function App() {
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+
+            <Route element={<AdminRoute />}>
+              <Route element={<AdminLayout />}>
+                <Route path="admin" element={<AdminDashboardPage />} />
+                <Route path="admin/users" element={<AdminUsersPage />} />
+                <Route path="admin/clients" element={<AdminClientsPage />} />
+                <Route path="admin/quotes" element={<AdminQuotesPage />} />
+              </Route>
+            </Route>
 
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
