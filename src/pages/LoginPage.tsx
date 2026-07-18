@@ -32,7 +32,7 @@ export function LoginPage() {
       await signIn(data.email, data.password)
       const { data: { user } } = await supabase.auth.getUser()
       toast.success('Login realizado com sucesso!')
-      navigate(isAdminUser(user) ? '/admin' : '/')
+      navigate(isAdminUser(user) ? '/admin' : '/dashboard')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao fazer login')
     } finally {

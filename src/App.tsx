@@ -6,9 +6,12 @@ import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { AdminRoute } from '@/components/AdminRoute'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AdminLayout } from '@/components/layout/AdminLayout'
+import { LandingPage } from '@/pages/LandingPage'
 import { LoginPage } from '@/pages/LoginPage'
 import { RegisterPage } from '@/pages/RegisterPage'
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage'
+import { CheckoutPage } from '@/pages/CheckoutPage'
+import { PaymentSuccessPage, PaymentErrorPage, PaymentPendingPage } from '@/pages/PaymentPages'
 import { DashboardPage } from '@/pages/DashboardPage'
 import { ClientsPage } from '@/pages/ClientsPage'
 import { QuoteFormPage } from '@/pages/QuoteFormPage'
@@ -21,11 +24,13 @@ import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { AdminClientsPage } from '@/pages/admin/AdminClientsPage'
 import { AdminQuotesPage } from '@/pages/admin/AdminQuotesPage'
 import { Skeleton } from '@/components/ui/skeleton'
+import { useSubscription } from '@/hooks/useSubscription'
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { user, loading, isAdmin } = useAuth()
+  const { active, loading: subLoading } = useSubscription()
 
-  if (loading) {
+  if (loading || (user && !isAdmin && subLoading)) {
     return (
       <div className="flex min-h-svh items-center justify-center">
         <Skeleton className="h-8 w-48" />
@@ -34,7 +39,9 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   }
 
   if (user) {
-    return <Navigate to={isAdmin ? '/admin' : '/'} replace />
+    if (isAdmin) return <Navigate to="/admin" replace />
+    if (active) return <Navigate to="/dashboard" replace />
+    return <Navigate to="/checkout" replace />
   }
 
   return <>{children}</>
@@ -46,9 +53,15 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
             <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
             <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/pagamento/sucesso" element={<PaymentSuccessPage />} />
+            <Route path="/pagamento/erro" element={<PaymentErrorPage />} />
+            <Route path="/pagamento/pendente" element={<PaymentPendingPage />} />
 
             <Route element={<AdminRoute />}>
               <Route element={<AdminLayout />}>
@@ -61,7 +74,7 @@ export default function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
-                <Route index element={<DashboardPage />} />
+                <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="clients" element={<ClientsPage />} />
                 <Route path="quotes/new" element={<QuoteFormPage />} />
                 <Route path="quotes/:id/edit" element={<QuoteFormPage />} />

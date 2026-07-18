@@ -8,6 +8,10 @@ export interface Profile {
   city: string | null
   state: string | null
   logo_url: string | null
+  subscription_expires_at: string | null
+  pdf_primary_color: string | null
+  pdf_footer_text: string | null
+  pdf_show_watermark: boolean | null
   created_at: string
 }
 
@@ -79,4 +83,13 @@ export interface ProfileFormData {
   address: string
   city: string
   state: string
+  pdf_primary_color: string
+  pdf_footer_text: string
+  pdf_show_watermark: boolean
+}
+
+export interface PdfSettings {
+  primaryColor: string
+  footerText: string
+  showWatermark: boolean
 }

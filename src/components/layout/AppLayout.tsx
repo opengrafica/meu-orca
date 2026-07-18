@@ -19,7 +19,7 @@ import { signOut } from '@/services/authService'
 import { toast } from 'sonner'
 
 const navItems = [
-  { to: '/', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { to: '/clients', label: 'Clientes', icon: Users },
   { to: '/quotes/new', label: 'Novo Orçamento', icon: FilePlus },
   { to: '/history', label: 'Histórico', icon: History },
@@ -35,7 +35,8 @@ function NavLink({ to, label, icon: Icon, onClick }: {
 }) {
   const location = useLocation()
   const isActive = location.pathname === to ||
-    (to !== '/' && location.pathname.startsWith(to))
+    (to === '/dashboard' && location.pathname === '/dashboard') ||
+    (to !== '/dashboard' && location.pathname.startsWith(to))
 
   return (
     <Link
@@ -71,7 +72,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="border-b px-4 py-5">
-        <Link to="/" className="flex items-center gap-2" onClick={onNavigate}>
+        <Link to="/dashboard" className="flex items-center gap-2" onClick={onNavigate}>
           <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground font-bold text-sm">
             MO
           </div>

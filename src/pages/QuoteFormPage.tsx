@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { Plus, Trash2, Save, FileDown } from 'lucide-react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Plus, Trash2, Save, FileDown, Eye } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -9,16 +9,15 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import { getClients } from '@/services/clientService'
 import {
   getNextQuoteNumber, createQuote, updateQuote, getQuoteById,
 } from '@/services/quoteService'
 import { getProfile } from '@/services/profileService'
-import { generateQuotePDF } from '@/lib/pdfGenerator'
+import { generateQuotePDF, buildQuoteFromForm } from '@/lib/pdfGenerator'
 import { formatCurrency, todayISO, addDaysISO } from '@/lib/formatters'
+import { useAuth } from '@/contexts/AuthContext'
 import type { Client, QuoteFormData, QuoteItem } from '@/types'
 
 const emptyItem = (): QuoteItem => ({
@@ -31,6 +30,7 @@ const emptyItem = (): QuoteItem => ({
 export function QuoteFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const isEditing = !!id
 
   const [clients, setClients] = useState<Client[]>([])
@@ -44,6 +44,9 @@ export function QuoteFormPage() {
   const [notes, setNotes] = useState('')
   const [discount, setDiscount] = useState(0)
   const [items, setItems] = useState<QuoteItem[]>([emptyItem()])
+
+  const selectedClient = clients.find((c) => c.id === clientId)
+  const clientOptions = clients.map((c) => ({ value: c.id, label: c.name }))
 
   useEffect(() => {
     const init = async () => {
@@ -98,18 +101,17 @@ export function QuoteFormPage() {
   const subtotal = items.reduce((sum, item) => sum + item.quantity * item.unit_price, 0)
   const total = Math.max(0, subtotal - discount)
 
-  const handleSave = async () => {
+  const getFormData = (): QuoteFormData | null => {
     if (!clientId) {
       toast.error('Selecione um cliente')
-      return
+      return null
     }
     const validItems = items.filter((i) => i.description.trim())
     if (validItems.length === 0) {
       toast.error('Adicione pelo menos um item')
-      return
+      return null
     }
-
-    const formData: QuoteFormData = {
+    return {
       client_id: clientId,
       quote_number: quoteNumber,
       issue_date: issueDate,
@@ -118,16 +120,30 @@ export function QuoteFormPage() {
       discount,
       items: validItems,
     }
+  }
+
+  const handleSave = async (andPdf = false) => {
+    const formData = getFormData()
+    if (!formData) return
 
     setSaving(true)
     try {
+      let savedId = id
       if (isEditing && id) {
         await updateQuote(id, formData)
         toast.success('Orçamento atualizado!')
       } else {
-        await createQuote(formData)
+        const created = await createQuote(formData)
+        savedId = created.id
         toast.success('Orçamento criado!')
       }
+
+      if (andPdf && savedId) {
+        const [quote, profile] = await Promise.all([getQuoteById(savedId), getProfile()])
+        if (quote) await generateQuotePDF(quote, profile)
+        toast.success('PDF personalizado gerado!')
+      }
+
       navigate('/history')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Erro ao salvar')
@@ -136,16 +152,31 @@ export function QuoteFormPage() {
     }
   }
 
+  const handlePdfPreview = async (download = false) => {
+    const formData = getFormData()
+    if (!formData || !user) return
+
+    try {
+      const profile = await getProfile()
+      const quote = buildQuoteFromForm(formData, selectedClient, user.id)
+      await generateQuotePDF(quote, profile, { preview: !download })
+      if (download) toast.success('PDF personalizado baixado!')
+      else toast.success('Pré-visualização aberta!')
+    } catch {
+      toast.error('Erro ao gerar PDF')
+    }
+  }
+
   const handleExportPDF = async () => {
     if (!isEditing || !id) {
-      toast.error('Salve o orçamento antes de exportar')
+      await handlePdfPreview(true)
       return
     }
     try {
       const [quote, profile] = await Promise.all([getQuoteById(id), getProfile()])
       if (!quote) return
       await generateQuotePDF(quote, profile)
-      toast.success('PDF gerado!')
+      toast.success('PDF personalizado gerado!')
     } catch {
       toast.error('Erro ao gerar PDF')
     }
@@ -164,22 +195,37 @@ export function QuoteFormPage() {
     <div>
       <PageHeader
         title={isEditing ? `Orçamento #${quoteNumber}` : 'Novo Orçamento'}
-        description="Preencha os dados e adicione os itens"
+        description="Preencha os dados e gere PDF personalizado com sua logo"
         action={
-          <div className="flex gap-2">
-            {isEditing && (
-              <Button variant="outline" onClick={handleExportPDF}>
-                <FileDown className="size-4" />
-                PDF
-              </Button>
-            )}
-            <Button onClick={handleSave} disabled={saving}>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={() => handlePdfPreview(false)}>
+              <Eye className="size-4" />
+              Prévia PDF
+            </Button>
+            <Button variant="outline" onClick={handleExportPDF}>
+              <FileDown className="size-4" />
+              PDF Personalizado
+            </Button>
+            <Button variant="outline" onClick={() => handleSave(true)} disabled={saving}>
+              <FileDown className="size-4" />
+              Salvar + PDF
+            </Button>
+            <Button onClick={() => handleSave(false)} disabled={saving}>
               <Save className="size-4" />
               {saving ? 'Salvando...' : 'Salvar'}
             </Button>
           </div>
         }
       />
+
+      {clients.length === 0 && (
+        <div className="mb-4 rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm">
+          Você ainda não tem clientes.{' '}
+          <Link to="/clients" className="text-primary font-medium hover:underline">
+            Cadastre um cliente primeiro
+          </Link>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-1">
@@ -193,18 +239,15 @@ export function QuoteFormPage() {
             </div>
             <div className="space-y-2">
               <Label>Cliente *</Label>
-              <Select value={clientId} onValueChange={(v) => setClientId(v ?? '')}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione..." />
-                </SelectTrigger>
-                <SelectContent>
-                  {clients.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <NativeSelect
+                value={clientId}
+                onChange={setClientId}
+                options={clientOptions}
+                placeholder="Selecione um cliente..."
+                disabled={clients.length === 0}
+              />
             </div>
-            <div className="grid gap-4 grid-cols-2">
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Data</Label>
                 <Input type="date" value={issueDate} onChange={(e) => setIssueDate(e.target.value)} />
@@ -234,7 +277,7 @@ export function QuoteFormPage() {
               <div key={index} className="grid gap-2 rounded-lg border p-3 sm:grid-cols-12">
                 <div className="sm:col-span-5">
                   <Input
-                    placeholder="Descrição"
+                    placeholder="Descrição do serviço/produto"
                     value={item.description}
                     onChange={(e) => updateItem(index, 'description', e.target.value)}
                   />
@@ -252,15 +295,15 @@ export function QuoteFormPage() {
                 <div className="sm:col-span-2">
                   <Input
                     type="number"
-                    placeholder="Valor unit."
+                    placeholder="R$ unit."
                     min={0}
                     step={0.01}
                     value={item.unit_price || ''}
                     onChange={(e) => updateItem(index, 'unit_price', parseFloat(e.target.value) || 0)}
                   />
                 </div>
-                <div className="flex items-center justify-between sm:col-span-2">
-                  <span className="text-sm font-medium">{formatCurrency(item.total)}</span>
+                <div className="flex items-center sm:col-span-2">
+                  <span className="text-sm font-semibold text-primary">{formatCurrency(item.total)}</span>
                 </div>
                 <div className="flex items-center sm:col-span-1">
                   <Button
@@ -281,7 +324,7 @@ export function QuoteFormPage() {
                 <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex items-center justify-between gap-4">
-                <span className="text-muted-foreground text-sm">Desconto</span>
+                <span className="text-muted-foreground text-sm">Desconto (R$)</span>
                 <Input
                   type="number"
                   min={0}
@@ -291,7 +334,7 @@ export function QuoteFormPage() {
                   onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
                 />
               </div>
-              <div className="flex justify-between text-lg font-bold">
+              <div className="flex justify-between rounded-lg bg-primary/10 px-3 py-2 text-lg font-bold">
                 <span>Total</span>
                 <span className="text-primary">{formatCurrency(total)}</span>
               </div>

@@ -10,7 +10,7 @@ export function NotFoundPage() {
       <p className="text-muted-foreground mt-2 max-w-md">
         A página que você procura não existe ou foi movida.
       </p>
-      <Button className="mt-6" render={<Link to="/" />}>
+      <Button className="mt-6" render={<Link to="/dashboard" />}>
         <Home className="size-4" />
         Voltar ao Dashboard
       </Button>

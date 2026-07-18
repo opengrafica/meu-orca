@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Upload, Trash2 } from 'lucide-react'
+import { Upload, Trash2, Palette } from 'lucide-react'
 import { toast } from 'sonner'
 import { PageHeader } from '@/components/common/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -22,6 +22,9 @@ const schema = z.object({
   address: z.string(),
   city: z.string(),
   state: z.string(),
+  pdf_primary_color: z.string(),
+  pdf_footer_text: z.string(),
+  pdf_show_watermark: z.boolean(),
 })
 
 export function ProfilePage() {
@@ -30,9 +33,16 @@ export function ProfilePage() {
   const [logoUrl, setLogoUrl] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<ProfileFormData>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors } } = useForm<ProfileFormData>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      pdf_primary_color: '#2563eb',
+      pdf_footer_text: '',
+      pdf_show_watermark: true,
+    },
   })
+
+  const pdfColor = watch('pdf_primary_color')
 
   useEffect(() => {
     getProfile()
@@ -45,6 +55,9 @@ export function ProfilePage() {
             address: profile.address ?? '',
             city: profile.city ?? '',
             state: profile.state ?? '',
+            pdf_primary_color: profile.pdf_primary_color ?? '#2563eb',
+            pdf_footer_text: profile.pdf_footer_text ?? '',
+            pdf_show_watermark: profile.pdf_show_watermark !== false,
           })
           setLogoUrl(profile.logo_url)
         }
@@ -68,12 +81,10 @@ export function ProfilePage() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
     if (!file.type.startsWith('image/')) {
       toast.error('Selecione uma imagem')
       return
     }
-
     try {
       const url = await uploadLogo(file)
       await updateLogoUrl(url)
@@ -108,37 +119,37 @@ export function ProfilePage() {
     <div>
       <PageHeader
         title="Perfil da Empresa"
-        description="Dados que aparecem nos seus orçamentos e PDFs"
+        description="Dados e personalização do PDF dos seus orçamentos"
       />
 
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle className="text-base">Logo e Identidade</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6 flex items-center gap-4">
-            <Avatar className="size-20 rounded-lg">
-              {logoUrl ? (
-                <AvatarImage src={logoUrl} alt="Logo" className="object-cover" />
-              ) : (
-                <AvatarFallback className="rounded-lg text-lg">MO</AvatarFallback>
-              )}
-            </Avatar>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
-                <Upload className="size-4" />
-                Upload
-              </Button>
-              {logoUrl && (
-                <Button variant="ghost" size="sm" onClick={handleRemoveLogo}>
-                  <Trash2 className="size-4 text-destructive" />
+      <form onSubmit={handleSubmit(onSubmit)} className="max-w-2xl space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Logo e Identidade</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-4">
+              <Avatar className="size-20 rounded-lg">
+                {logoUrl ? (
+                  <AvatarImage src={logoUrl} alt="Logo" className="object-cover" />
+                ) : (
+                  <AvatarFallback className="rounded-lg text-lg">MO</AvatarFallback>
+                )}
+              </Avatar>
+              <div className="flex gap-2">
+                <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}>
+                  <Upload className="size-4" />
+                  Upload
                 </Button>
-              )}
-              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+                {logoUrl && (
+                  <Button type="button" variant="ghost" size="sm" onClick={handleRemoveLogo}>
+                    <Trash2 className="size-4 text-destructive" />
+                  </Button>
+                )}
+                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
+              </div>
             </div>
-          </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="company_name">Nome da Empresa *</Label>
               <Input id="company_name" {...register('company_name')} />
@@ -152,7 +163,6 @@ export function ProfilePage() {
               <div className="space-y-2">
                 <Label htmlFor="email">E-mail</Label>
                 <Input id="email" type="email" {...register('email')} />
-                {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
               </div>
             </div>
             <div className="space-y-2">
@@ -169,12 +179,45 @@ export function ProfilePage() {
                 <Input id="state" {...register('state')} />
               </div>
             </div>
-            <Button type="submit" disabled={saving}>
-              {saving ? 'Salvando...' : 'Salvar Perfil'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Palette className="size-4" />
+              Personalização do PDF
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="pdf_primary_color">Cor principal do PDF</Label>
+              <div className="flex gap-3">
+                <Input id="pdf_primary_color" type="color" className="h-10 w-16 cursor-pointer p-1" {...register('pdf_primary_color')} />
+                <Input value={pdfColor} onChange={(e) => setValue('pdf_primary_color', e.target.value)} className="flex-1 font-mono" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pdf_footer_text">Texto do rodapé</Label>
+              <Input id="pdf_footer_text" placeholder="Ex: Open Gráfica — Orçamentos profissionais" {...register('pdf_footer_text')} />
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" {...register('pdf_show_watermark')} className="size-4 rounded" />
+              Mostrar marca MeuOrça no rodapé
+            </label>
+            <div
+              className="rounded-lg p-4 text-white text-sm"
+              style={{ backgroundColor: pdfColor ?? '#2563eb' }}
+            >
+              Prévia da cor no PDF — cabeçalho e totais usarão esta cor
+            </div>
+          </CardContent>
+        </Card>
+
+        <Button type="submit" disabled={saving}>
+          {saving ? 'Salvando...' : 'Salvar Perfil'}
+        </Button>
+      </form>
     </div>
   )
 }

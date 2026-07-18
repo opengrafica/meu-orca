@@ -13,9 +13,7 @@ import { Badge } from '@/components/ui/badge'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table'
-import {
-  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from '@/components/ui/select'
+import { NativeSelect } from '@/components/ui/native-select'
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -107,17 +105,14 @@ export function HistoryPage() {
 
       <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <SearchInput value={search} onChange={setSearch} placeholder="Pesquisar..." />
-        <Select value={clientFilter} onValueChange={(v) => setClientFilter(v ?? 'all')}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Todos os clientes" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Todos os clientes</SelectItem>
-            {clients.map((c) => (
-              <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <NativeSelect
+          value={clientFilter}
+          onChange={setClientFilter}
+          options={[
+            { value: 'all', label: 'Todos os clientes' },
+            ...clients.map((c) => ({ value: c.id, label: c.name })),
+          ]}
+        />
         <div className="space-y-1">
           <Label className="text-xs text-muted-foreground">De</Label>
           <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
